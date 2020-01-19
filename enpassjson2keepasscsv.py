@@ -35,6 +35,8 @@ def main():
         for folderItem in enpassJson['folders']:
             folderDict[folderItem['uuid']] = folderItem['title']
 
+        knownFieldTypes = ['username', 'password', 'url']
+
         passwordItems = []
         for item in enpassJson['items']:
             passwordItem = PasswordItem()
@@ -58,13 +60,13 @@ def main():
                     fieldType = field['type']
                     fieldValue = field['value']
     
-                    # As we have no entries for the specific types we add this information to the notes field:
-                    if fieldValue and passwordItem.group in ['license', 'creditcard', 'identity']:
-                        if (passwordItem.notes):
-                            passwordItem.notes += '\n'
-                        passwordItem.notes += field['label']+': '+fieldValue
-
                     if fieldValue:
+                        # Add all unsupported fields to the notes field:
+                        if 'label' in field and fieldType not in knownFieldTypes:
+                            if (passwordItem.notes):
+                                passwordItem.notes += '\n'
+                            passwordItem.notes += field['label']+': '+fieldValue
+                        # Add the normal fields to the item:
                         if fieldType=='password' and not passwordItem.password:
                             passwordItem.password = fieldValue
                         elif fieldType=='username' and not passwordItem.username:
